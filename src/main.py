@@ -1,29 +1,139 @@
+from threading import Timer
+
 import flet as ft
-from flet.core.colors import colors
-from flet.core.padding import Padding
+from api.api import get_events, get_news
 
 
-def main(page):
+def main(page: ft.Page):
 
-    page.adaptive = True
+    def create_employees():
+        row = []
+        for i in range(5):
+            row.append(
+                ft.Container(
+                    ft.Column(
+                        [
+                            ft.Text(
+                                "Петров Адмирал Иванович",
+                                size=16,
+                                weight=ft.FontWeight.BOLD,
+                                color=ft.Colors.WHITE,
+                            ),
+                            ft.Text(
+                                "Директор шлагбаума", size=12, color=ft.Colors.WHITE
+                            ),
+                            ft.Text("test@dorogi.ru", size=12, color=ft.Colors.WHITE),
+                            ft.Text("+7 233 323 323", size=12, color=ft.Colors.WHITE),
+                            ft.Text("15 декабря", size=12, color=ft.Colors.WHITE),
+                        ]
+                    ),
+                    padding=5,
+                    bgcolor=ft.Colors.GREEN,
+                    col={"sm": 6, "md": 4, "xl": 2},
+                )
+            )
+        return row
 
-    page.title = "Поиск в AppBar"
+    def create_events():
+        events = []
+        data = get_events()
+        for value in data:
+            events.append(
+                ft.Container(
+                    ft.Column(
+                        controls=[
+                            ft.Text(
+                                value.title,
+                                size=16,
+                                weight=ft.FontWeight.BOLD,
+                                color=ft.Colors.WHITE,
+                            ),
+                            ft.Text(
+                                value.description,
+                                size=12,
+                                color=ft.Colors.WHITE,
+                            ),
+                            ft.Text(
+                                value.dateTime,
+                                size=12,
+                                color=ft.Colors.WHITE,
+                            ),
+                            ft.Text(
+                                value.author,
+                                size=12,
+                                color=ft.Colors.WHITE,
+                            ),
+                        ]
+                    ),
+                    padding=5,
+                    width=400,
+                    bgcolor=ft.Colors.GREEN,
+                    col={"sm": 1, "md": 1, "xl": 1},
+                )
+            )
+        return events
+
+    def create_news():
+        news = []
+        data = get_news()
+        print(data)
+        for value in data:
+            news.append(
+                ft.Container(
+                    padding=5,
+                    bgcolor=ft.Colors.GREEN,
+                    col={"sm": 1, "md": 1, "xl": 1},
+                    width=450,
+                    height=200,
+                    content=ft.Column(
+                        controls=[
+                            ft.Image(src="./assets/Logo.svg", height=30),
+                            ft.Text(
+                                value.title,
+                                size=16,
+                                weight=ft.FontWeight.BOLD,
+                                color=ft.Colors.WHITE,
+                            ),
+                            ft.Text(
+                                value.description,
+                                size=12,
+                                color=ft.Colors.WHITE,
+                            ),
+                            ft.Text(
+                                value.dateTime,
+                                size=10,
+                                text_align=ft.alignment.bottom_left,
+                                color=ft.Colors.WHITE,
+                                weight=ft.FontWeight.BOLD,
+                            ),
+                        ],
+                    ),
+                )
+            )
+        page.update()
+        return news
+
+    page.title = "Web"
     page.theme_mode = ft.ThemeMode.LIGHT
 
     # Создаем поле для поиска
-    search_field = ft.TextField(
-        hint_text="Введите для поиска",
-        expand=False,
-        border_color=ft.Colors.TRANSPARENT,
-        border_radius=10,
-        filled=True,
-        bgcolor=ft.Colors.WHITE,
-        width=1150,
-        on_submit=lambda e: print(f"Поиск: {e.control.value}")
+    search_field = ft.Row(
+        controls=[
+            ft.TextField(
+                hint_text="Введите для поиска",
+                expand=True,
+                col={"sm": 12, "md": 12, "xl": 12, "xxl": 12},
+                border_color=ft.Colors.TRANSPARENT,
+                border_radius=10,
+                filled=True,
+                bgcolor=ft.Colors.WHITE,
+                on_submit=lambda e: print(f"Поиск: {e.control.value}"),
+            )
+        ]
     )
 
     logo = ft.Image(
-        src="./assets/icon.png",
+        src="Logo.svg",
         width=40,
         height=40,
         fit=ft.ImageFit.CONTAIN,
@@ -33,84 +143,50 @@ def main(page):
     page.appbar = ft.AppBar(
         leading=logo,  # Логотип в левом углу
         bgcolor=ft.Colors.GREEN,
-
-    actions=[
-        ft.Container(content=search_field, padding=ft.padding.only(right=30)),
-    ],)
-
-
-    page.navigation_bar = ft.NavigationBar(
-        destinations=[
-            ft.NavigationBarDestination(icon=ft.Icons.EXPLORE, label="Explore"),
-            ft.NavigationBarDestination(icon=ft.Icons.COMMUTE, label="Commute"),
-            ft.NavigationBarDestination(
-                icon=ft.Icons.BOOKMARK_BORDER,
-                selected_icon=ft.Icons.BOOKMARK,
-                label="Bookmark",
-            ),
+        actions=[
+            ft.Container(content=search_field, padding=ft.padding.only(left=50)),
         ],
-        border=ft.Border(
-            top=ft.BorderSide(color=ft.CupertinoColors.SYSTEM_GREY2, width=0)
-        ),
     )
-    rows = []
-    for i in range(5):
-        rows.append(
-            ft.Container(bgcolor=ft.Colors.GREEN, width=180, padding=20,
-                content=ft.Column(
-                    controls=[
-                        ft.Text("Петров Адмирал Иванович", size=16, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE,),
-                        ft.Text("Директор шлагбаума", size=12, color=ft.Colors.WHITE),
-                        ft.Text("test@dorogi.ru", size=12, color=ft.Colors.WHITE),
-                        ft.Text("+7 233 323 323", size=12, color=ft.Colors.WHITE),
-                        ft.Text("15 декабря", size=12, color=ft.Colors.WHITE),
-                    ],
-                    spacing=1, adaptive=True,
-                )
-            )
-       )
-    events=[]
-    for i in range(3):
-        events.append(ft.Container(bgcolor=ft.Colors.GREEN, width=350, height=100,
-                                  content=ft.Column(controls=[
-                                     ft.Text("Общее совещание в актовом зале", size=16, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
-                                     ft.Text("Все сотрудника отдела 'Администраторы'собираемся", size=12, color=ft.Colors.WHITE),
-                                      ft.Text("26.05.2024", size=10, text_align=ft.alignment.bottom_left, color=ft.Colors.WHITE),
-                                  ],spacing=1) ))
-    news = []
-    for i in range(4):
-        news.append(ft.Container(bgcolor=ft.Colors.GREEN, width=450, height=100,
-                                  content=ft.Column(controls=[
-                                     ft.Text("Водители на трассе М-12 сыграли 'Полёт шмеля'", size=16, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
-                                     ft.Text("Они ехали-ехали и сыграли! Они ехали-ехали и сыграли! Они ехали ехали и сыграли! Они ехали-ехали и сыграли! Они ехали-ехали и сыграли!", size=12, color=ft.Colors.WHITE),
-                                      ft.Text("04.05.2024", size=10, text_align=ft.alignment.bottom_left, color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD),
-                                  ],spacing=1) ))
     page.add(
-        ft.SafeArea(
-            ft.Row(controls=[
-                    ft.Column(
+        ft.ListView(
+            expand=True,
+            controls=[
+                ft.ResponsiveRow(
                     [
                         ft.Text("Сотрудники", weight=ft.FontWeight.BOLD, size=30),
-                        ft.Row([
-                        *rows,
-                        ]),
-                        ft.Text("События", weight=ft.FontWeight.BOLD, size=30),
-                        ft.Column(
-                            [
-                                *events,
-                            ]
-                        )
-                    ],
-                ),
-                ft.Column([
-                    ft.Text("Новости", weight=ft.FontWeight.BOLD, size=30),
-                    *news
+                        *create_employees(),
+                        ft.Row(
+                            wrap=True,
+                            controls=[
+                                ft.Column(
+                                    col={"sm": 1, "md": 1, "xl": 1},
+                                    controls=[
+                                        ft.Text(
+                                            "События",
+                                            weight=ft.FontWeight.BOLD,
+                                            size=30,
+                                        ),
+                                        *create_events(),
+                                    ],
+                                ),
+                                ft.Column(
+                                    col={"sm": 1, "md": 1, "xl": 1},
+                                    controls=[
+                                        ft.Text(
+                                            "Новости",
+                                            weight=ft.FontWeight.BOLD,
+                                            size=30,
+                                        ),
+                                        *create_news(),
+                                    ],
+                                ),
+                            ],
+                        ),
                     ]
-            )]
-        )
-
+                ),
+            ],
         )
     )
 
 
-ft.app(main)
+ft.app(main, assets_dir="./assets")
